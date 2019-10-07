@@ -19,7 +19,7 @@ MYSQL_HOST    = 'localhost'
 MYSQL_PORT    = 3306
 MYSQL_DBNAME  = 'share'
 MYSQL_USER    = 'root'
-MYSQL_PASSWD  = 'your psw'
+MYSQL_PASSWD  = 'your passwd'
 MYSQL_CHARSET = 'utf8'
 
 

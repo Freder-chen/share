@@ -26,7 +26,7 @@ brew install mysql
 python3 -m pip install pymysql pandas peewee tushare requests
 
 # 创建数据库
-mysql -uroot -e "create database share"
+mysql -uroot -e "create database share" # 可以在 /share/util/setting.py 的 MYSQL_DBNAME 字段中更改数据库名
 ```
 
 ## 部分功能及使用
@@ -58,7 +58,10 @@ share.drop_tables()
 import share
 
 # True 为交易日，False 为非交易日
-bool = share.is_open() 
+bool = share.is_open(date)
+
+# True 为有交易日，False 为无交易日
+bool = share.have_open(start_date, end_date)
 
 # 返回深沪两市所有股票代码
 list = share.get_all_symbols() 

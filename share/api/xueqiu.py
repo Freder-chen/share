@@ -18,10 +18,6 @@ def drop_table():
         XueqiuModel.drop_table()
 
 
-# def get_all_symbols():
-#     return get_stocks_base()['symbol'].tolist()
-
-
 def get_stocks_base():
     query = XueqiuModel.select().where(
         XueqiuModel.date == XueqiuModel.select(fn.MAX(XueqiuModel.date)).scalar()

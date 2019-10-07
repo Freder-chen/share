@@ -2,14 +2,18 @@
 
 import datetime
 from .util.common import BasePipline
-from .models import db, TushareproBaseModel, TushareproHistoryModel, XueqiuModel, EastMoneyModel
+from .spiders.tusharepro import TushareProTradeDateSpider, TushareProHistorySpider
+from .models import (
+    db, TushareproBaseModel, TushareproTradeDateModel, 
+    TushareproHistoryModel, XueqiuModel, EastMoneyModel
+)
 
 
 __all__ = ['TushareProBasePipeline', 'TushareProHistoryPipeline', 'XueqiuPipeline', 'EastMoneyPipeline']
         
 
 class TushareProBasePipeline(BasePipline):
-    name   = 'tusharepro_base_pipeline'
+    name = 'tusharepro_base_pipeline'
 
     def __init__(self):
         from .spiders.tusharepro import TushareProBaseSpider
@@ -17,8 +21,20 @@ class TushareProBasePipeline(BasePipline):
         self.spider = TushareProBaseSpider(delay=0.3)
         self.model  = TushareproBaseModel
 
-    def create_item(self, item):
-        self.model.create(**item)
+    def save(self):
+        if self.model.table_exists():
+            self.model.drop_table()
+        if not self.model.table_exists():
+            self.model.create_table()
+        with db.atomic():
+            for item in self.spider.do_spider():
+                self.process_item(item)
+
+
+class TushareProTradeDatePipline(BasePipline):
+    name   = 'tusharepro_trade_date_pipline'
+    spider = TushareProTradeDateSpider(delay=0.3)
+    model  = TushareproTradeDateModel
 
     def save(self):
         if self.model.table_exists():
@@ -31,8 +47,6 @@ class TushareProBasePipeline(BasePipline):
 
 
 class TushareProHistoryPipeline(BasePipline):
-    from .spiders.tusharepro import TushareProHistorySpider
-
     name   = 'tusharepro_history_pipeline'
     spider = TushareProHistorySpider(delay=0.3)
     model  = TushareproHistoryModel
@@ -49,9 +63,6 @@ class XueqiuPipeline(BasePipline):
         self._today  = datetime.date.today()
 
     def create_item(self, item):
-        # item = { k: v for k, v in item.items() if k in [
-        #     'symbol', 'dividend_yield', 'turnover_rate', 'xq_followers', 'pb', 'current'
-        # ]}
         item['date'] = self._today
         self.model.create(**item)
 

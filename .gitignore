@@ -25,6 +25,7 @@ __main__.py
 # Ignore my own files
 /analysis.py
 /test.py
+/setting.py
 /update.py
 /result/*
 /script/*

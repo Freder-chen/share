@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from ..models import TushareproBaseModel, TushareproHistoryModel
-from ..piplines import TushareProBasePipeline, TushareProHistoryPipeline
+from ..util.common import check_date
+from ..models import TushareproBaseModel, TushareproTradeDateModel, TushareproHistoryModel
+from ..piplines import TushareProBasePipeline, TushareProTradeDatePipline, TushareProHistoryPipeline
 
 
 __all__ = [
-    'download', 'download_base', 'download_history',
-    'drop_table', 'drop_base_table', 'drop_history_table',
-    'is_open', 'get_all_symbols', 'get_stocks_base', 'get_daily'
+    'download',
+    'download_base', 'download_trade_date', 'download_history',
+    'drop_table', 'drop_base_table', 'drop_trade_date_table', 'drop_history_table',
+    'is_open', 'have_open', 'get_all_symbols', 'get_stocks_base', 'get_daily'
 ]
 
+# about datebase #
 
 def download_base():
     TushareProBasePipeline().save()
+
+
+def download_trade_date():
+    TushareProTradeDatePipline().save()
 
 
 def download_history():
@@ -21,6 +28,7 @@ def download_history():
 
 
 def download():
+    print('The interface is outdated...')
     download_base()
     download_history()
 
@@ -30,6 +38,10 @@ def drop_base_table():
         TushareproBaseModel.drop_table()
 
 
+def drop_trade_date_table():
+    if TushareproTradeDateModel.table_exists():
+        TushareproTradeDateModel.drop_table()
+
 def drop_history_table():
     if TushareproHistoryModel.table_exists():
         TushareproHistoryModel.drop_table()
@@ -37,16 +49,24 @@ def drop_history_table():
 
 def drop_table():
     drop_base_table()
+    drop_trade_date_table()
     drop_history_table()
 
+# end of datebase #
 
-# def get_mean(df, n):
-#     return df['close'].rolling(n).mean().shift(1-n)
 
+# about getting data #
 
 def is_open(date):
-    from ..spiders.tusharepro import pro
-    return bool(pro.trade_cal(start_date=date, end_date=date).loc[0, 'is_open'])
+    return TushareproTradeDateModel[check_date(date)].is_open
+
+
+def have_open(start_date, end_date):
+    query = TushareproTradeDateModel.select().where(
+        (TushareproTradeDateModel.date >= check_date(start_date)) &
+        (TushareproTradeDateModel.date <= check_date(end_date))
+    )
+    return True in [item['is_open'] for item in query.dicts()]
 
 
 def get_all_symbols():
@@ -64,8 +84,10 @@ def get_daily(symbol, start_date=None, end_date=None):
     query = TushareproHistoryModel.select().where(TushareproHistoryModel.symbol == symbol)
     # if query is empty, means there are not exist the symbol.
     # TO-DO: warning
-    if type(start_date) is str:
-        query = query.where(TushareproHistoryModel.trade_date >= start_date)
-    if type(end_date) is str:
-        query = query.where(TushareproHistoryModel.trade_date <= end_date)
+    if type(start_date) is not None:
+        query = query.where(TushareproHistoryModel.trade_date >= check_date(start_date))
+    if type(end_date) is not None:
+        query = query.where(TushareproHistoryModel.trade_date <= check_date(end_date))
     return pd.DataFrame(list(query.dicts()))
+
+# end of getting data #

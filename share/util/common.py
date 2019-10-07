@@ -8,20 +8,32 @@ from datetime import datetime
 from abc import abstractmethod, ABCMeta
 from http.client import IncompleteRead, HTTPResponse
 
-# from ..models import db
 from .setting import User_Agent, ERROR_PATH
+
+# def get_mean(df, n):
+#     return df['close'].rolling(n).mean().shift(1-n)
 
 
 def _get_user_agent():
     return User_Agent
 
 
-def get_date(sdate, format='%Y%m%d'):
-    return datetime.strptime(sdate, format)
+# def get_date(sdate, format='%Y%m%d'):
+#     return datetime.strptime(sdate, format)
+# def get_today(format='%Y%m%d'):
+#     return datetime.now().strftime(format)
 
 
-def get_today(format='%Y%m%d'):
-    return datetime.now().strftime(format)
+def check_date(date):
+    import datetime
+    if isinstance(date, datetime.date):
+        return date.strftime('%Y%m%d')
+    elif str(date) == date:
+        if len(date) != 8:
+            raise ValueError('Unknown date: {}'.format(date))
+        return date
+    else:
+        raise TypeError('date is not datetime.date or a valid string: {}'.format(date))
 
 
 def query_folder(path):

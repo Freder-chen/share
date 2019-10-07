@@ -5,7 +5,6 @@ from .util.setting import MYSQL_HOST, MYSQL_PORT, MYSQL_DBNAME, MYSQL_USER, MYSQ
 
 # mysql -u root -e "create database share"; 
 # mysql -u root -p
-# mysql -u <user> -p
 # create database share;
 
 
@@ -19,7 +18,6 @@ class BaseModel(Model):
 
 
 class TushareproBaseModel(BaseModel):
-    # ts_code
     symbol    = CharField(max_length=10, primary_key=True, null=False)
     name      = CharField(max_length=20, null=True)
     area      = CharField(max_length=20, null=True)
@@ -29,6 +27,14 @@ class TushareproBaseModel(BaseModel):
     class Meta:
         table_name = 'tusharepro_base'
         # primary_key = 'symbol'
+
+
+class TushareproTradeDateModel(BaseModel):
+    date    = DateField(primary_key=True, null=False)
+    is_open = BooleanField(null=False)
+
+    class Meta:
+        table_name = 'tusharepro_trade_date'        
 
 
 class TushareproHistoryModel(BaseModel):
