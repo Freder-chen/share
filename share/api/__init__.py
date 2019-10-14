@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from .tusharepro import (
-    get_all_symbols as get_ts_all_symbols,
-    get_stocks_base as get_ts_stocks_base,
-    get_daily as get_ts_daily,
     download_base as download_ts_base,
     download_trade_date as download_ts_trade_date,
     download_history as download_ts_history,
@@ -11,26 +8,26 @@ from .tusharepro import (
     drop_trade_date_table as drop_ts_trade_date_table,
     drop_history_table as drop_ts_history_table,
     is_open as is_ts_open,
-    have_open as have_ts_open
+    have_open as have_ts_open,
+    get_all_symbols as get_ts_all_symbols,
+    get_stocks_base as get_ts_stocks_base,
+    get_daily as get_ts_daily
 )
-
 from .xueqiu import (
-    get_stocks_base as get_xq_stocks_base,
     download as download_xq,
-    drop_table as drop_xq_table
+    drop_table as drop_xq_table,
+    get_stocks_base as get_xq_stocks_base
 )
-
 from .eastmoney import (
-    get_stock_comment as get_em_stock_comment,
     download as download_em,
-    drop_table as drop_em_table
+    drop_table as drop_em_table,
+    get_stock_comment as get_em_stock_comment
 )
-
 from ..util.common import DoFuncItem
 
 
 __all__ = [
-    'update', 'download', 'drop_tables', 'is_open', 'have_open',
+    'update', 'download', 'drop_table', 'is_open', 'have_open',
     'get_all_symbols', 'get_stocks_base', 'get_daily',
     'get_xq_feature', 'get_em_feature'
 ]
@@ -74,7 +71,7 @@ def _check_dofunc_list(dofunc_list, enum):
     elif str(dofunc_list) == dofunc_list:
         l = [_check_dofunc_item(dofunc_list, enum)]
     else:
-        raise TypeError('dofunc_list not a list, a set or a valid string: {}'.format(dofunc_list))
+        raise TypeError('dofunc_list not a list or a valid string: {}'.format(dofunc_list))
     return l
 
 
@@ -89,7 +86,7 @@ def download(update_list=_update_enum):
     update(update_list)
 
 
-def drop_tables(drop_list=_drop_enum):
+def drop_table(drop_list=_drop_enum):
     l = _check_dofunc_list(drop_list, _drop_enum)
     l.sort(key=lambda x: x.level)
     for i in l: i.func()

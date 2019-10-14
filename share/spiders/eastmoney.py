@@ -4,7 +4,9 @@ import json
 from ..util.common import BaseSpider
 from ..api.tusharepro import get_all_symbols
 
+
 __all__ = ['EastMoneySpider']
+
 
 def _trans_var(vstr):
     def _trans_generator(vstr):
@@ -20,15 +22,15 @@ def _trans_dict(rdict, keys=None):
     return { _trans_var(k): v for k, v in rdict.items() }
 
 
+def _check_result(res):
+    if res and 'HasError' in res and res['HasError'] == False:
+        return res['Scode'][:6], res['ApiResults']
+    # else
+    raise Exception('east money request has error, res: {}'.format(res))
+
+
 class EastMoneySpider(BaseSpider):
     name = 'eastmoney_spider'
-
-    @staticmethod
-    def _check_res(res):
-        if res and 'HasError' in res and res['HasError'] == False:
-            return res['Scode'][:6], res['ApiResults']
-        # else
-        raise Exception('request has error')
 
     def url_generator(self):
         for symbol in get_all_symbols():
@@ -36,7 +38,7 @@ class EastMoneySpider(BaseSpider):
 
     def parse(self, response):
         try:
-            symbol, jdata = EastMoneySpider._check_res(json.loads(response.content.decode('utf-8')))
+            symbol, jdata = _check_result(json.loads(response.content.decode('utf-8')))
         except Exception as e:
             raise Exception(e)
         item = { 'symbol': symbol }

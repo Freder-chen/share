@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # import functools
-import os, time, json, logging
-
+import os
+import time
+import json
+import logging
 import requests
-from datetime import datetime
 from abc import abstractmethod, ABCMeta
-from http.client import IncompleteRead, HTTPResponse
-
 from .setting import User_Agent, ERROR_PATH
+
 
 # def get_mean(df, n):
 #     return df['close'].rolling(n).mean().shift(1-n)
@@ -16,12 +16,6 @@ from .setting import User_Agent, ERROR_PATH
 
 def _get_user_agent():
     return User_Agent
-
-
-# def get_date(sdate, format='%Y%m%d'):
-#     return datetime.strptime(sdate, format)
-# def get_today(format='%Y%m%d'):
-#     return datetime.now().strftime(format)
 
 
 def check_date(date):
@@ -52,11 +46,9 @@ class BaseLogger(object):
     @staticmethod
     def get_file_logger(name, log_path, level, format='%(asctime)s %(name)s : [%(levelname)s] %(message)s'):
         query_folder(os.path.dirname(log_path))
-
         handler = logging.FileHandler(filename=log_path)
         handler.setLevel(level)
         handler.setFormatter(logging.Formatter(format))
-        
         logger = logging.getLogger(name)
         logger.addHandler(handler)
         return logger
@@ -66,12 +58,23 @@ class BaseSpider(metaclass=ABCMeta):
     name = 'base_spider'
     urls = []
 
-    def __init__(self, delay=1, log_path=ERROR_PATH):
+    def __init__(self, delay=1, log_path=ERROR_PATH, log_level=logging.WARNING):
         super(BaseSpider, self).__init__()
-        self._delay   = delay
-        self._logger  = BaseLogger.get_file_logger(self.name, ERROR_PATH, logging.WARNING)
-        self._request = requests.Session()
+        # for log
+        self._log_path  = log_path
+        self._log_level = log_level
+        self.set_logger()
+        # for request
+        self._delay     = delay
+        self._request   = requests.Session()
         self._request.headers['User-Agent'] = _get_user_agent()
+
+    def set_logger(self, log_path=None, log_level=None):
+        self._logger = BaseLogger.get_file_logger(
+            self.name,
+            self._log_path if log_path is None else log_path,
+            self._log_level if log_level is None else log_level,
+        )
 
     def get_raw(self, url, timeout=10, times=3):
         if times == 0:
@@ -80,19 +83,13 @@ class BaseSpider(metaclass=ABCMeta):
             time.sleep(self._delay)
             return self._request.get(url, timeout=timeout)
         except Exception as e:
-            self._logger.error(e)
+            self._logger.error('get_raw error: {}'.format(e))
             return self.get_raw(url, timeout=timeout, times=times - 1)
-
-    def get(self, url, timeout=10, times=3):
-        raw = self.get_raw(url, timeout=timeout, times=times)
-        if raw:
-            return raw
-        return None
 
     def request(self, url, type=None):
         try:
             self._logger.debug('request url: {}'.format(url))
-            return self.get(url)
+            return self.get_raw(url)
         except Exception as e:
             self._logger.error('request error: {}'.format(e))
             return None
@@ -112,6 +109,7 @@ class BaseSpider(metaclass=ABCMeta):
         raise NotImplementedError("You need to implement this method 'parse'.")
 
     def do_spider(self):
+        from http.client import HTTPResponse
         for response in self.start_requests():
             try:
                 for item in self.parse(response):
@@ -125,14 +123,23 @@ class BaseSpider(metaclass=ABCMeta):
 
 
 class BasePipline(metaclass=ABCMeta):
-    name = 'base_pipline'
+    name   = 'base_pipline'
     spider = None
-    model = None
+    model  = None
     crawl_item_num = 0
 
     def __init__(self, log_path=ERROR_PATH):
         super(BasePipline, self).__init__()
-        self._logger = BaseLogger.get_file_logger(self.name, log_path, logging.WARNING)
+        self._log_path  = log_path
+        self._log_level = logging.WARNING
+        self.set_logger()
+
+    def set_logger(self, log_path=None, log_level=None):
+        self._logger = BaseLogger.get_file_logger(
+            self.name,
+            self._log_path if log_path is None else log_path,
+            self._log_level if log_level is None else log_level,
+        )
 
     def create_item(self, item):
         self.model.create(**item)
@@ -151,55 +158,32 @@ class BasePipline(metaclass=ABCMeta):
     def save(self):
         if not self.model.table_exists():
             self.model.create_table()
-        # with db.atomic():
         for item in self.spider.do_spider():
             self.process_item(item)
 
 
 class DoFuncItem(object):
 
-    def __init__(self, name, level, func=None):
+    def __init__(self, name, level, func):
         super(DoFuncItem, self).__init__()
         self.name  = name
-        self.level = level
-        self.func  = func
+        self.level = DoFuncItem._check_level(level)
+        self.func  = DoFuncItem._check_func(func)
 
     @staticmethod
     def _check_level(level):
         if isinstance(level, int):
-            l = level
-        else:
-            raise TypeError('level not an integer: {}'.format(level))
-        return l
+            return level
+        # else
+        raise TypeError('level not an integer: {}'.format(level))
 
-    def __ge__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level >= other.level
-        return NotImplemented
-
-    def __gt__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level > other.level
-        return NotImplemented
-
-    def __le__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level <= other.level
-        return NotImplemented
-
-    def __lt__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level < other.level
-        return NotImplemented
-    def __eq__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level == other.level
-        return NotImplemented
-
-    def __ne__(self, other):
-        if self.__class__ is other.__class__:
-            return self.level != other.level
-        return NotImplemented
+    @staticmethod
+    def _check_func(func):
+        from collections import Callable
+        if isinstance(func, Callable):
+            return func
+        # else
+        raise TypeError('func can not call: {}'.format(func))
 
     def __repr__(self):
         return '{} (name: {}): [level: {}] <func: {}>'.format(self.__class__, self.name, self.level, self.func)

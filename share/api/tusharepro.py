@@ -84,9 +84,9 @@ def get_daily(symbol, start_date=None, end_date=None):
     query = TushareproHistoryModel.select().where(TushareproHistoryModel.symbol == symbol)
     # if query is empty, means there are not exist the symbol.
     # TO-DO: warning
-    if type(start_date) is not None:
+    if start_date is not None:
         query = query.where(TushareproHistoryModel.trade_date >= check_date(start_date))
-    if type(end_date) is not None:
+    if end_date is not None:
         query = query.where(TushareproHistoryModel.trade_date <= check_date(end_date))
     return pd.DataFrame(list(query.dicts()))
 

@@ -29,6 +29,26 @@ python3 -m pip install pymysql pandas peewee tushare requests
 mysql -uroot -e "create database share" # 可以在 /share/util/setting.py 的 MYSQL_DBNAME 字段中更改数据库名
 ```
 
+## 项目参数设置
+
+```python
+# 在根目录下创建 /share/setting.py 必须叫这个名字
+
+# 必要参数有 MYSQL_PASSWD 和 TUSHAREPRO_TOKEN
+MYSQL_PASSWD = 'your passwd' # 这是你的 mysql 数据库密码
+# from https://tushare.pro/register?reg=233504
+TUSHAREPRO_TOKEN = 'your token' # 这是你的 tushare pro token
+
+#######################################
+# 还可以在这里更改另一些参数, 这里是默认设置
+MYSQL_HOST    = 'localhost'
+MYSQL_PORT    = 3306
+MYSQL_DBNAME  = 'share'
+MYSQL_USER    = 'root'
+MYSQL_CHARSET = 'utf8'
+ERROR_PATH = os.path.join(sys.path[0], 'log', 'error.out') # error_log 输出路径
+```
+
 ## 部分功能及使用
 
 由于这个项目很大程度上是自用，所以并没有完整的注释和文档。

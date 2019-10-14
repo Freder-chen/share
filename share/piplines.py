@@ -10,7 +10,7 @@ from .models import (
 
 
 __all__ = ['TushareProBasePipeline', 'TushareProHistoryPipeline', 'XueqiuPipeline', 'EastMoneyPipeline']
-        
+
 
 class TushareProBasePipeline(BasePipline):
     name = 'tusharepro_base_pipeline'
@@ -33,8 +33,11 @@ class TushareProBasePipeline(BasePipline):
 
 class TushareProTradeDatePipline(BasePipline):
     name   = 'tusharepro_trade_date_pipline'
-    spider = TushareProTradeDateSpider(delay=0.3)
-    model  = TushareproTradeDateModel
+    
+    def __init__(self):
+        super(TushareProTradeDatePipline, self).__init__()
+        self.spider = TushareProTradeDateSpider(delay=0.3)
+        self.model  = TushareproTradeDateModel
 
     def save(self):
         if self.model.table_exists():
@@ -48,8 +51,11 @@ class TushareProTradeDatePipline(BasePipline):
 
 class TushareProHistoryPipeline(BasePipline):
     name   = 'tusharepro_history_pipeline'
-    spider = TushareProHistorySpider(delay=0.3)
-    model  = TushareproHistoryModel
+
+    def __init__(self):
+        super(TushareProHistoryPipeline, self).__init__()
+        self.spider = TushareProHistorySpider(delay=0.3)
+        self.model  = TushareproHistoryModel
 
 
 class XueqiuPipeline(BasePipline):

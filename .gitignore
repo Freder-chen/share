@@ -27,5 +27,6 @@ __main__.py
 /test.py
 /setting.py
 /update.py
+/drop.py
 /result/*
 /script/*
