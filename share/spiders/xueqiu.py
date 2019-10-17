@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from ..util.common import BaseSpider
+from ..utils import BaseSpider
 
 
 __all__ = ['XueqiuSpider']
@@ -22,7 +22,7 @@ class XueqiuSpider(BaseSpider):
         for btype in btypes:
             url = base_url.format(1, size, btype)
             try:
-                res = _check_result(json.loads(self.get(url).content.decode('utf-8')))
+                res = _check_result(json.loads(self.request(url).content.decode('utf-8')))
                 total_page = int((res['count'] + size - 1) / size)
             except Exception as e:
                 self._logger.exception('get total page fail in <{}>\nerror_description:\n    {}'.format(btype, e))

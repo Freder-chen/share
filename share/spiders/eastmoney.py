@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from ..util.common import BaseSpider
+from ..utils import BaseSpider
 from ..api.tusharepro import get_all_symbols
 
 

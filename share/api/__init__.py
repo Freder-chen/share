@@ -23,13 +23,16 @@ from .eastmoney import (
     drop_table as drop_em_table,
     get_stock_comment as get_em_stock_comment
 )
-from ..util.common import DoFuncItem
+from .common import get_history_rate, save_history_rate, drop_history_rate
+
+from ..utils import DoFuncItem
 
 
 __all__ = [
     'update', 'download', 'drop_table', 'is_open', 'have_open',
     'get_all_symbols', 'get_stocks_base', 'get_daily',
-    'get_xq_feature', 'get_em_feature'
+    'get_xq_feature', 'get_em_feature', 
+    'get_history_rate', 'save_history_rate', 'drop_history_rate',
 ]
 
 
@@ -37,16 +40,18 @@ _update_enum = [
     DoFuncItem(name='TushareProBase',      level=10, func=download_ts_base),
     DoFuncItem(name='TushareProTradeDate', level=10, func=download_ts_trade_date),
     DoFuncItem(name='TushareProHistory',   level=20, func=download_ts_history),
-    DoFuncItem(name='EastMoney',           level=20, func=download_xq),
-    DoFuncItem(name='XueQiu',              level=20, func=download_em),
+    DoFuncItem(name='EastMoney',           level=20, func=download_em),
+    DoFuncItem(name='XueQiu',              level=20, func=download_xq),
+    DoFuncItem(name='HistoryRate',         level=30, func=save_history_rate),
 ]
 
 _drop_enum = [
     DoFuncItem(name='TushareProBase',      level=10, func=drop_ts_base_table),
     DoFuncItem(name='TushareProTradeDate', level=10, func=drop_ts_trade_date_table),
     DoFuncItem(name='TushareProHistory',   level=10, func=drop_ts_history_table),
-    DoFuncItem(name='EastMoney',           level=10, func=drop_xq_table),
-    DoFuncItem(name='XueQiu',              level=10, func=drop_em_table),
+    DoFuncItem(name='EastMoney',           level=10, func=drop_em_table),
+    DoFuncItem(name='XueQiu',              level=10, func=drop_xq_table),
+    DoFuncItem(name='HistoryRate',         level=10, func=drop_history_rate),
 ]
 
 

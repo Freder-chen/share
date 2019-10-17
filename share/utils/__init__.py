@@ -7,7 +7,7 @@ import json
 import logging
 import requests
 from abc import abstractmethod, ABCMeta
-from .setting import User_Agent, ERROR_PATH
+from ..config import User_Agent, ERROR_PATH
 
 
 # def get_mean(df, n):
@@ -72,8 +72,8 @@ class BaseSpider(metaclass=ABCMeta):
     def set_logger(self, log_path=None, log_level=None):
         self._logger = BaseLogger.get_file_logger(
             self.name,
-            self._log_path if log_path is None else log_path,
-            self._log_level if log_level is None else log_level,
+            log_path  or self._log_path,
+            log_level or self._log_level,
         )
 
     def get_raw(self, url, timeout=10, times=3):
@@ -84,9 +84,9 @@ class BaseSpider(metaclass=ABCMeta):
             return self._request.get(url, timeout=timeout)
         except Exception as e:
             self._logger.error('get_raw error: {}'.format(e))
-            return self.get_raw(url, timeout=timeout, times=times - 1)
+            return self.get_raw(url, timeout=timeout, times=times-1)
 
-    def request(self, url, type=None):
+    def request(self, url):
         try:
             self._logger.debug('request url: {}'.format(url))
             return self.get_raw(url)
@@ -137,8 +137,8 @@ class BasePipline(metaclass=ABCMeta):
     def set_logger(self, log_path=None, log_level=None):
         self._logger = BaseLogger.get_file_logger(
             self.name,
-            self._log_path if log_path is None else log_path,
-            self._log_level if log_level is None else log_level,
+            log_path or self._log_path,
+            log_level or self._log_level,
         )
 
     def create_item(self, item):

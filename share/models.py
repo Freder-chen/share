@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from peewee import *
-from .util.setting import MYSQL_HOST, MYSQL_PORT, MYSQL_DBNAME, MYSQL_USER, MYSQL_PASSWD, MYSQL_CHARSET
+from .config import MYSQL_HOST, MYSQL_PORT, MYSQL_DBNAME, MYSQL_USER, MYSQL_PASSWD, MYSQL_CHARSET
 
 # mysql -u root -e "create database share"; 
 # mysql -u root -p
 # create database share;
 
 
-db = MySQLDatabase(MYSQL_DBNAME, host = MYSQL_HOST, port=MYSQL_PORT,
+db = MySQLDatabase(MYSQL_DBNAME, host=MYSQL_HOST, port=MYSQL_PORT,
     user=MYSQL_USER, passwd=MYSQL_PASSWD, charset=MYSQL_CHARSET)
 
 
@@ -93,3 +93,21 @@ class EastMoneyModel(BaseModel):
     class Meta:
         table_name = 'east_money'
         primary_key = CompositeKey('symbol', 'date')
+
+
+class HistoryRateModel(BaseModel):
+    symbol            = CharField(max_length=10, primary_key=True, null=False)
+    name              = CharField(max_length=20, null=True)
+    area              = CharField(max_length=20, null=True)
+    industry          = CharField(max_length=20, null=True)
+    current           = FloatField(null=True)
+    dividend_yield    = FloatField(null=True)
+    turnover_rate     = FloatField(null=True)
+    rate              = FloatField(null=True)
+    xq_followers      = FloatField(null=True)
+    focus_score       = FloatField(null=True)
+    market_heat_score = FloatField(null=True)
+    stock_focus       = FloatField(null=True)
+
+    class Meta:
+        table_name = 'history_rate'

@@ -13,20 +13,19 @@ node_modules
 # Ignore SASS config files
 .sass-cache
 
-# Ignore log
-/log/*
-/dividend/*
-
 # Ignore python run file
 __pycache__
 *.pyc
-__main__.py
 
 # Ignore my own files
-/analysis.py
-/test.py
-/setting.py
-/update.py
-/drop.py
+/log/*
 /result/*
 /script/*
+/share_client/*
+
+/setting.py
+/analysis.py
+/test.py
+/update.py
+/drop.py
+

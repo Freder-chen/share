@@ -6,7 +6,7 @@ from ..models import XueqiuModel
 from ..piplines import XueqiuPipeline
 
 
-__all__ = ['download', 'drop_table', 'get_all_symbols', 'get_stocks_base']
+__all__ = ['download', 'drop_table', 'get_stocks_base']
 
 
 def download():

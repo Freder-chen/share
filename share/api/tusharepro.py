@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from ..util.common import check_date
+from ..utils import check_date
 from ..models import TushareproBaseModel, TushareproTradeDateModel, TushareproHistoryModel
 from ..piplines import TushareProBasePipeline, TushareProTradeDatePipline, TushareProHistoryPipeline
 

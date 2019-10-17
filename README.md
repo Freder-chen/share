@@ -11,19 +11,18 @@ Share 是自己玩股票的小工具，目前还只有爬虫代码，爬取了 t
 - [Windows MySQL安装-菜鸟教程](https://www.runoob.com/mysql/mysql-install.html)
 
 ```shell
-# python environment on linux
-apt-get install python3
-apt-get install python3-pip
-# python environment on Mac
-brew install python3
+# environment on linux
+sudo apt-get -y update
+sudo apt-get -y install python3 python3-venv python3-dev python3-pip
+sudo apt-get -y install mysql-server postfix supervisor nginx git
 
-# mysql environment on linux
-apt install mysql-server
-# mysql environment on Mac
+# environment on Mac
+brew install python3
 brew install mysql
 
 # 安装需要的python包
-python3 -m pip install pymysql pandas peewee tushare requests
+python3 -m pip install pymysql pandas peewee tushare requests flask flask_sqlalchemy flask_migrate
+python3 -m pip install gunicorn pymysql
 
 # 创建数据库
 mysql -uroot -e "create database share" # 可以在 /share/util/setting.py 的 MYSQL_DBNAME 字段中更改数据库名
@@ -32,7 +31,7 @@ mysql -uroot -e "create database share" # 可以在 /share/util/setting.py 的 M
 ## 项目参数设置
 
 ```python
-# 在根目录下创建 /share/setting.py 必须叫这个名字
+# 在根目录下创建 setting.py 必须叫这个名字
 
 # 必要参数有 MYSQL_PASSWD 和 TUSHAREPRO_TOKEN
 MYSQL_PASSWD = 'your passwd' # 这是你的 mysql 数据库密码
@@ -46,7 +45,7 @@ MYSQL_PORT    = 3306
 MYSQL_DBNAME  = 'share'
 MYSQL_USER    = 'root'
 MYSQL_CHARSET = 'utf8'
-ERROR_PATH = os.path.join(sys.path[0], 'log', 'error.out') # error_log 输出路径
+ERROR_PATH    = os.path.join(sys.path[0], 'log', 'error.out') # error_log 输出路径
 ```
 
 ## 部分功能及使用
@@ -56,11 +55,10 @@ ERROR_PATH = os.path.join(sys.path[0], 'log', 'error.out') # error_log 输出路
 ### 爬取数据导入数据库
 
 ```python
-'''在爬取数据之前你需要在 /share/util/setting.py 中更改自己的 tushare_pro_token 和数据库密码'''
 import share, logging
 logging.basicConfig(level=logging.INFO)
 share.download()
-# 也可以使用 share.update()
+# 也可以命令行中使用 python -m share
 ```
 
 ### 删除数据库数据

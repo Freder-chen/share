@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-from .util.common import BasePipline
-from .spiders.tusharepro import TushareProTradeDateSpider, TushareProHistorySpider
+from .utils import BasePipline
 from .models import (
     db, TushareproBaseModel, TushareproTradeDateModel, 
     TushareproHistoryModel, XueqiuModel, EastMoneyModel
@@ -35,6 +34,7 @@ class TushareProTradeDatePipline(BasePipline):
     name   = 'tusharepro_trade_date_pipline'
     
     def __init__(self):
+        from .spiders.tusharepro import TushareProTradeDateSpider
         super(TushareProTradeDatePipline, self).__init__()
         self.spider = TushareProTradeDateSpider(delay=0.3)
         self.model  = TushareproTradeDateModel
@@ -53,6 +53,7 @@ class TushareProHistoryPipeline(BasePipline):
     name   = 'tusharepro_history_pipeline'
 
     def __init__(self):
+        from .spiders.tusharepro import TushareProHistorySpider
         super(TushareProHistoryPipeline, self).__init__()
         self.spider = TushareProHistorySpider(delay=0.3)
         self.model  = TushareproHistoryModel

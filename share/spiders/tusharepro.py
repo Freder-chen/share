@@ -4,8 +4,8 @@ import time
 import datetime
 import tushare as ts
 from peewee import fn
-from ..util.common import BaseSpider
-from ..util.setting import TUSHAREPRO_TOKEN
+from ..utils import BaseSpider
+from ..config import TUSHAREPRO_TOKEN
 from ..models import TushareproBaseModel, TushareproTradeDateModel, TushareproHistoryModel
 
 
