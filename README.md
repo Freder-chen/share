@@ -1,5 +1,7 @@
 # Share
 
+> 当前的 readme 存在很多问题，不一定能够指导运行，自行看代码尝试。
+
 Share 是自己玩股票的小工具，目前还只有爬虫代码，爬取了 tushare、雪球、东方财富的某些特定信息。上传以后方便自己服务器迭代版本。如果能够对其他人有用那也不错。
 
 ## 安装
@@ -31,12 +33,11 @@ mysql -uroot -e "create database share" # 可以在 /share/util/setting.py 的 M
 ## 项目参数设置
 
 ```python
-# 在根目录下创建 setting.py 必须叫这个名字
+# 在根目录下创建 config.py 必须叫这个名字
 
 # 必要参数有 MYSQL_PASSWD 和 TUSHAREPRO_TOKEN
 MYSQL_PASSWD = 'your passwd' # 这是你的 mysql 数据库密码
-# from https://tushare.pro/register?reg=233504
-TUSHAREPRO_TOKEN = 'your token' # 这是你的 tushare pro token
+TUSHAREPRO_TOKEN = 'your token' # 这是你的 tushare pro token, 详情看 https://tushare.pro/register?reg=233504
 
 #######################################
 # 还可以在这里更改另一些参数, 这里是默认设置
@@ -85,15 +86,15 @@ bool = share.have_open(start_date, end_date)
 list = share.get_all_symbols() 
 
 # 返回深沪两市所有股票基本信息
-df = share.get_stocks_base()
+pandas.DataFrame = share.get_stocks_base()
 
 # 得到深沪两市某支股票的历史交易信息，start_data和end_date为可选项，格式为‘YYYYMMDD’
-df = share.get_daily(symbol, start_date, end_date)
+pandas.DataFrame = share.get_daily(symbol=None, start_date=None, end_date=None)
 
 # 得到雪球上的某些特征，如股票关注人数等
-df = share.get_xq_feature()
+pandas.DataFrame = share.get_xq_feature(symbol=None, start_date=None, end_date=None)
 
 # 得到东方财富的某些特征，如关注热度等
-df = share.get_em_feature()
+pandas.DataFrame = share.get_em_feature(symbol=None, start_date=None, end_date=None)
 ```
 

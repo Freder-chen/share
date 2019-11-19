@@ -76,17 +76,20 @@ def get_all_symbols():
 
 def get_stocks_base():
     # TO-DO: warning db block.
+    # try:
     query = TushareproBaseModel.select()
     return pd.DataFrame(list(query.dicts()))
+    # except 
 
 
-def get_daily(symbol, start_date=None, end_date=None):
-    query = TushareproHistoryModel.select().where(TushareproHistoryModel.symbol == symbol)
-    # if query is empty, means there are not exist the symbol.
-    # TO-DO: warning
-    if start_date is not None:
+def get_daily(symbol=None, start_date=None, end_date=None):
+    query = TushareproHistoryModel.select()
+    # TO-DO: warning have no data
+    if symbol:
+        query = query.where(TushareproHistoryModel.symbol == symbol)
+    if start_date:
         query = query.where(TushareproHistoryModel.trade_date >= check_date(start_date))
-    if end_date is not None:
+    if end_date:
         query = query.where(TushareproHistoryModel.trade_date <= check_date(end_date))
     return pd.DataFrame(list(query.dicts()))
 

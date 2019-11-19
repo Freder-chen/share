@@ -41,40 +41,35 @@ def add_folder(spath, foder_name):
     return path
 
 
-class BaseLogger(object):
-
-    @staticmethod
-    def get_file_logger(name, log_path, level, format='%(asctime)s %(name)s : [%(levelname)s] %(message)s'):
-        query_folder(os.path.dirname(log_path))
-        handler = logging.FileHandler(filename=log_path)
-        handler.setLevel(level)
-        handler.setFormatter(logging.Formatter(format))
-        logger = logging.getLogger(name)
-        logger.addHandler(handler)
-        return logger
+def get_file_logger(name, path, level, format='%(asctime)s %(name)s : [%(levelname)s] %(message)s'):
+    query_folder(os.path.dirname(path))
+    handler = logging.FileHandler(filename=path)
+    handler.setLevel(level)
+    handler.setFormatter(logging.Formatter(format))
+    logger = logging.getLogger(name)
+    logger.addHandler(handler)
+    return logger
 
 
-class BaseSpider(metaclass=ABCMeta):
+class Base(metaclass=ABCMeta):
+    name = None
+
+    def __init__(self, path, level):
+        self.set_logger(path, level)
+
+    def set_logger(self, path=None, level=None):
+        self._logger = get_file_logger(self.name, path, level)
+
+
+class BaseSpider(Base):
     name = 'base_spider'
     urls = []
 
     def __init__(self, delay=1, log_path=ERROR_PATH, log_level=logging.WARNING):
-        super(BaseSpider, self).__init__()
-        # for log
-        self._log_path  = log_path
-        self._log_level = log_level
-        self.set_logger()
-        # for request
+        super(BaseSpider, self).__init__(log_path, log_level)
         self._delay     = delay
         self._request   = requests.Session()
         self._request.headers['User-Agent'] = _get_user_agent()
-
-    def set_logger(self, log_path=None, log_level=None):
-        self._logger = BaseLogger.get_file_logger(
-            self.name,
-            log_path  or self._log_path,
-            log_level or self._log_level,
-        )
 
     def get_raw(self, url, timeout=10, times=3):
         if times == 0:
@@ -122,24 +117,14 @@ class BaseSpider(metaclass=ABCMeta):
                     self._logger.error('parse error: {}'.format(e))
 
 
-class BasePipline(metaclass=ABCMeta):
+class BasePipline(Base):
     name   = 'base_pipline'
     spider = None
     model  = None
     crawl_item_num = 0
 
-    def __init__(self, log_path=ERROR_PATH):
-        super(BasePipline, self).__init__()
-        self._log_path  = log_path
-        self._log_level = logging.WARNING
-        self.set_logger()
-
-    def set_logger(self, log_path=None, log_level=None):
-        self._logger = BaseLogger.get_file_logger(
-            self.name,
-            log_path or self._log_path,
-            log_level or self._log_level,
-        )
+    def __init__(self, log_path=ERROR_PATH, log_level=logging.WARNING):
+        super(BasePipline, self).__init__(log_path, log_level)
 
     def create_item(self, item):
         self.model.create(**item)
@@ -174,7 +159,6 @@ class DoFuncItem(object):
     def _check_level(level):
         if isinstance(level, int):
             return level
-        # else
         raise TypeError('level not an integer: {}'.format(level))
 
     @staticmethod
@@ -182,7 +166,6 @@ class DoFuncItem(object):
         from collections import Callable
         if isinstance(func, Callable):
             return func
-        # else
         raise TypeError('func can not call: {}'.format(func))
 
     def __repr__(self):

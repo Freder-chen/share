@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from peewee import *
-from .config import MYSQL_HOST, MYSQL_PORT, MYSQL_DBNAME, MYSQL_USER, MYSQL_PASSWD, MYSQL_CHARSET
+from . import config
 
+# sqlalchemy
 # mysql -u root -e "create database share"; 
 # mysql -u root -p
 # create database share;
 
 
-db = MySQLDatabase(MYSQL_DBNAME, host=MYSQL_HOST, port=MYSQL_PORT,
-    user=MYSQL_USER, passwd=MYSQL_PASSWD, charset=MYSQL_CHARSET)
-
-
 class BaseModel(Model):
     class Meta:
-        database = db
+        database = config.DB
 
 
 class TushareproBaseModel(BaseModel):

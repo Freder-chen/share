@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from . import config
 from .utils import BasePipline
 from .models import (
-    db, TushareproBaseModel, TushareproTradeDateModel, 
+    TushareproBaseModel, TushareproTradeDateModel, 
     TushareproHistoryModel, XueqiuModel, EastMoneyModel
 )
 
 
-__all__ = ['TushareProBasePipeline', 'TushareProHistoryPipeline', 'XueqiuPipeline', 'EastMoneyPipeline']
+__all__ = [
+    'TushareProBasePipeline', 'TushareProTradeDatePipline', 'TushareProHistoryPipeline',
+    'XueqiuPipeline', 'EastMoneyPipeline'
+]
 
 
 class TushareProBasePipeline(BasePipline):
@@ -25,7 +29,7 @@ class TushareProBasePipeline(BasePipline):
             self.model.drop_table()
         if not self.model.table_exists():
             self.model.create_table()
-        with db.atomic():
+        with config.DB.atomic():
             for item in self.spider.do_spider():
                 self.process_item(item)
 
@@ -44,7 +48,7 @@ class TushareProTradeDatePipline(BasePipline):
             self.model.drop_table()
         if not self.model.table_exists():
             self.model.create_table()
-        with db.atomic():
+        with config.DB.atomic():
             for item in self.spider.do_spider():
                 self.process_item(item)
 

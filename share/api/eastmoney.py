@@ -2,6 +2,7 @@
 
 import pandas as pd
 from peewee import fn
+from ..utils import check_date
 from ..models import EastMoneyModel
 from ..piplines import EastMoneyPipeline
 
@@ -18,8 +19,13 @@ def drop_table():
         EastMoneyModel.drop_table()
 
 
-def get_stock_comment():
-    query = EastMoneyModel.select().where(
-        EastMoneyModel.date == EastMoneyModel.select(fn.MAX(EastMoneyModel.date)).scalar()
-    )
-    return pd.DataFrame(list(query.dicts())).drop('date', axis=1)
+def get_stock_comment(symbol=None, start_date=None, end_date=None):
+    query = EastMoneyModel.select()
+    # TO-DO: warning
+    if symbol:
+        query = query.where(EastMoneyModel.symbol == symbol)
+    if start_date:
+        query = query.where(EastMoneyModel.date >= check_date(start_date))
+    if end_date:
+        query = query.where(EastMoneyModel.date <= check_date(end_date))
+    return pd.DataFrame(list(query.dicts()))

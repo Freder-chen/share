@@ -19,13 +19,14 @@ __pycache__
 
 # Ignore my own files
 /log/*
-/result/*
+/data/*
 /script/*
 /share_client/*
 
-/setting.py
+/config.py
 /analysis.py
 /test.py
 /update.py
 /drop.py
 
+/backtest/*

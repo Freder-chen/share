@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 
+'''
+config use like:
+    from share import config
+    config.ATTRIBUTE
+'''
+
+
 import os, sys
+import tushare
+from peewee import MySQLDatabase
 
 
-default_config = {
+_default_config = {
     # for log
     'ERROR_PATH':      os.path.join(sys.path[0], 'log', 'error.out'),
     # for request
@@ -20,25 +29,46 @@ default_config = {
 }
 
 
-def import_string(import_name):
+def _import_string(import_name):
     try:
         __import__(import_name)
     except ImportError:
-        # if "." not in import_name:
         raise
     else:
         return sys.modules[import_name]
 
 
-def config_by_object(obj):
+def _set_attribute(name, value):
+    setattr(sys.modules[__name__], name, value)
+
+
+def _get_attribute(name):
+    getattr(sys.modules[__name__], name)
+
+
+def set_default_config():
+    for key, value in _default_config.items():
+        _set_attribute(key, value)
+
+
+def set_config_by_object(obj):
     if isinstance(obj, str):
-        obj = import_string(obj)
+        obj = _import_string(obj)
     for key in dir(obj):
         if key.isupper():
-            setattr(sys.modules[__name__], key, getattr(obj, key))
+            _set_attribute(key, getattr(obj, key))
 
 
-for key, value in default_config.items():
-    setattr(sys.modules[__name__], key, value)
+set_default_config()
 
-config_by_object('setting')
+try:
+    import config
+    set_config_by_object(config)
+    _set_attribute('PRO', tushare.pro_api(TUSHAREPRO_TOKEN))
+    _set_attribute('DB', MySQLDatabase(MYSQL_DBNAME, host=MYSQL_HOST, port=MYSQL_PORT, 
+        user=MYSQL_USER, passwd=MYSQL_PASSWD, charset=MYSQL_CHARSET))
+except ImportError as e:
+    raise
+
+
+

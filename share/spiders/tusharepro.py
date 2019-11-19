@@ -2,24 +2,23 @@
 
 import time
 import datetime
-import tushare as ts
 from peewee import fn
+from .. import config
 from ..utils import BaseSpider
-from ..config import TUSHAREPRO_TOKEN
 from ..models import TushareproBaseModel, TushareproTradeDateModel, TushareproHistoryModel
 
+__all__ = ['TushareProBaseSpider', 'TushareProTradeDateSpider', 'TushareProHistorySpider']
 
-__all__ = ['pro', 'TushareProBaseSpider', 'TushareProTradeDateSpider', 'TushareProHistorySpider']
 
-
-pro = ts.pro_api(TUSHAREPRO_TOKEN)
+# import tushare as ts
+# pro = ts.pro_api(config.TUSHAREPRO_TOKEN)
 
 
 class TushareProBaseSpider(BaseSpider):
     name = 'tusharepro_base_spider'
 
     def start_requests(self):
-        yield pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
+        yield config.PRO.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
 
     def parse(self, respose):
         for item in respose.to_dict('records'):
@@ -30,7 +29,10 @@ class TushareProTradeDateSpider(BaseSpider):
     name = 'tusharepro_trade_date_spider'
 
     def start_requests(self):
-        yield pro.trade_cal()
+        try:
+            yield config.PRO.trade_cal()
+        except Exception as e:
+            self._logger.warning(e)
 
     def parse(self, respose):
         for item in respose.to_dict('records'):
@@ -43,7 +45,7 @@ class TushareProTradeDateSpider(BaseSpider):
 # TushareProHistorySpider #
 
 def _get_signd():
-    df = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
+    df = config.PRO.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
     df['head'] = df['ts_code'].map(lambda x: x[:3])
     df['tail'] = df['ts_code'].map(lambda x: x[-2:])
     signd = {}
@@ -84,7 +86,7 @@ class TushareProHistorySpider(BaseSpider):
         while True:
             try:
                 time.sleep(self._delay)
-                return pro.daily(ts_code=_get_ts_code(symbol), start_date=start, end_date=end)
+                return config.PRO.daily(ts_code=_get_ts_code(symbol), start_date=start, end_date=end)
             except ConnectionError:
                 continue
             except Exception as e:

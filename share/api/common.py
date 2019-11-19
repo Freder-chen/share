@@ -17,16 +17,15 @@ def _calculat_stocks_cost(symbols):
     rate = []
     for index, symbol in enumerate(symbols):
         df = get_daily(symbol)
-        if df is None:
+        if df is None or df.empty:
             return None
         try:
             ma5_list = _get_daily_mean(df, 5).dropna().tolist()
-            now = ma5_list.pop(0)
+            now = ma5_list.pop(-1)
             res = sum(map(lambda x: 1 if x < now else 0, ma5_list)) / len(ma5_list)
             rate.append(res)
         except Exception as e:
-            print('error: {}, reason: {}'.format(symbol, e))
-        print('calculating: {:.2f}%'.format(index / len(symbols) * 100), end='\r')
+            print('calculating error: {}, reason: {}'.format(symbol, e))
     return rate
 
 
@@ -48,10 +47,8 @@ def _calculat_history_rate(symbols=None):
     stock_basics = stock_basics.merge(get_em_feature(), how='left', on='symbol')
     stock_basics = _intersect(stock_basics, { k: 0.2  for k in ['xq_followers', 'total_score', 'value_score', 'market_heat_score', 'focus_score', 'stock_focus']})
     stock_basics = stock_basics.loc[(stock_basics['dividend_yield'] > 2) & (stock_basics['turnover_rate'] > 0.5), :]
-    if symbols:
-        stock_basics = stock_basics[stock_basics['symbol'].isin(symbols)]
-        print(stock_basics)
     stock_basics['rate'] = _calculat_stocks_cost(stock_basics['symbol'].tolist())
+    stock_basics.dropna(subset=['rate'], inplace=True)
     stock_basics.sort_values(['rate'], inplace=True)
     stock_basics.reset_index(drop=True, inplace=True)
     return stock_basics[HistoryRateModel._meta.fields.keys()].astype(object).where(pd.notnull(stock_basics), None)
@@ -62,8 +59,7 @@ def save_history_rate():
         HistoryRateModel.drop_table()
     # if not HistoryRateModel.table_exists():
     HistoryRateModel.create_table()
-    for _, item in _calculat_history_rate(['000001', '000002']).iterrows():
-        print(item)
+    for _, item in _calculat_history_rate().iterrows():
         HistoryRateModel.create(**item)
 
 
@@ -73,5 +69,9 @@ def drop_history_rate():
 
 
 def get_history_rate(symbols=None):
-    query = HistoryRateModel.select()
+    from peewee import OperationalError
+    try:
+        query = HistoryRateModel.select()
+    except OperationalError as e:
+        return None
     return pd.DataFrame(list(query.dicts()))

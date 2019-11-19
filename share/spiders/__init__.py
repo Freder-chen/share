@@ -2,10 +2,10 @@
 
 from .xueqiu import XueqiuSpider
 from .eastmoney import EastMoneySpider
-from .tusharepro import pro, TushareProBaseSpider, TushareProTradeDateSpider, TushareProHistorySpider
+from .tusharepro import TushareProBaseSpider, TushareProTradeDateSpider, TushareProHistorySpider
 
 
 __all__ = [ 
-    'pro', 'XueqiuSpider', 'EastMoneySpider', 
+    'XueqiuSpider', 'EastMoneySpider', 
     'TushareProBaseSpider', 'TushareProTradeDateSpider', 'TushareProHistorySpider'
 ]

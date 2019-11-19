@@ -113,14 +113,14 @@ def get_stocks_base():
     return get_ts_stocks_base()
 
 
-def get_daily(symbol, start_date=None, end_date=None):
+def get_daily(symbol=None, start_date=None, end_date=None):
     return get_ts_daily(symbol, start_date, end_date)
 
 
-def get_xq_feature():
-    return get_xq_stocks_base()
+def get_xq_feature(symbol=None, start_date=None, end_date=None):
+    return get_xq_stocks_base(symbol, start_date, end_date)
 
 
-def get_em_feature():
-    return get_em_stock_comment()
+def get_em_feature(symbol=None, start_date=None, end_date=None):
+    return get_em_stock_comment(symbol, start_date, end_date)
 

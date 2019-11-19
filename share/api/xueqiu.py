@@ -2,6 +2,7 @@
 
 import pandas as pd
 from peewee import fn
+from ..utils import check_date
 from ..models import XueqiuModel
 from ..piplines import XueqiuPipeline
 
@@ -18,8 +19,13 @@ def drop_table():
         XueqiuModel.drop_table()
 
 
-def get_stocks_base():
-    query = XueqiuModel.select().where(
-        XueqiuModel.date == XueqiuModel.select(fn.MAX(XueqiuModel.date)).scalar()
-    )
-    return pd.DataFrame(list(query.dicts()))[['symbol', 'current', 'pb', 'dividend_yield', 'turnover_rate', 'xq_followers']]
+def get_stocks_base(symbol=None, start_date=None, end_date=None):
+    query = XueqiuModel.select()
+    # TO-DO: warning have no data
+    if symbol:
+        query = query.where(XueqiuModel.symbol == symbol)
+    if start_date:
+        query = query.where(XueqiuModel.date >= check_date(start_date))
+    if end_date:
+        query = query.where(XueqiuModel.date <= check_date(end_date))
+    return pd.DataFrame(list(query.dicts()))
